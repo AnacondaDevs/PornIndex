@@ -1,0 +1,49 @@
+
+🗺️ ROADMAP DE DESARROLLO — Porn Swiss Knife
+
+✅ FASE 1 — Núcleo: PornIndex (ya en marcha)
+✔ Índice de actrices favoritas con:
+- Cards con nombre, foto, descripción, tags, links.
+- Registro de “veces visto” y actriz destacada.
+- Edición y agregado desde formulario/modal.
+- Modo oscuro, responsive, estética cuidada.
+- Botón “Dejá que Johnny Sins decida” (random).
+- Links múltiples (Pornhub + alternativo).
+
+🔜 Estado: En desarrollo activo.
+
+🟨 FASE 2 — Módulo Historial & Favoritos automáticos
+🎯 Objetivo: Guardar automáticamente las actrices y links visitados.
+- [ ] Guardar fecha, hora, duración de sesión, actriz.
+- [ ] Posibilidad de marcar como: ✅ Favorito / ❌ No me gustó.
+- [ ] Acceso rápido al historial y filtros.
+- [ ] Exportación como JSON o CSV.
+
+🟨 FASE 3 — Buscador inteligente & tags
+🎯 Objetivo: Mejorar la exploración y búsqueda personalizada.
+- [ ] Buscador por nombre, tag, categoría, nacionalidad.
+- [ ] Sistema de tags inteligente (sugerencias y autocompletado).
+- [ ] Filtros por duración, color de piel, productora, estilo, etc.
+
+🟦 FASE 4 — Descubrimiento & Recomendaciones
+🎯 Objetivo: Ayudar a descubrir nuevas actrices o escenas.
+- [ ] Swipe tipo Tinder con tarjetas random de actrices o videos.
+- [ ] “¿Quién es esta actriz?” con búsqueda por captura o nombre parcial (etapa futura con IA).
+- [ ] “Te podría gustar” basado en tus hábitos.
+
+🟦 FASE 5 — IA recomendadora (más adelante)
+🎯 Objetivo: Personalización automática de recomendaciones.
+- [ ] Sistema que analiza frecuencia, duración, tags favoritos.
+- [ ] Te recomienda actrices o escenas nuevas cada semana.
+
+🟩 FASE 6 — Web App (PWA)
+🎯 Objetivo: Convertir el sitio en una app instalable.
+- [ ] Manifest, iconos, vite-plugin-pwa.
+- [ ] Instalación en escritorio o Android como app offline-first.
+- [ ] Caching básico para navegación rápida.
+
+🟥 FASE 7 — Opcional: Backup & multiusuario
+🎯 Objetivo: Que no se pierda el progreso y se pueda usar en varios dispositivos.
+- [ ] Sincronización con Firebase (si lo permitiera).
+- [ ] Crear cuentas o perfiles locales.
+- [ ] Encriptación o clave para modo privado.

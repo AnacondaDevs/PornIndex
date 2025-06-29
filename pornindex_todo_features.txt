@@ -1,0 +1,52 @@
+
+PORNINDEX - FUTURAS FUNCIONALIDADES
+
+🔍 FUNCIONALES
+1. Buscador en tiempo real
+   Filtrar actrices por nombre, descripción o tags mientras escribís.
+
+2. Favoritas destacadas
+   Marcar actrices como favoritas y que aparezcan en un carrusel arriba o en una sección aparte.
+
+3. Recuento total de vistas (stats)
+   Mostrar cuántas veces viste actrices en total, y quizás un top 3 con medallas 🥇🥈🥉.
+
+4. Botón “Sorpresa”
+   Te abre una actriz random de tu lista (tipo “siento suerte”).
+
+5. Backups/exportación
+   Guardar/recuperar tus datos en un archivo JSON por si reinstalás o cambiás de compu.
+
+
+🎨 VISUALES
+6. Modo galería/grid dinámico
+   Visualizar actrices en modo más visual tipo Pinterest o Instagram.
+
+7. Cambiar tema (oscuro/claro/rosa)
+   Un toggle para cambiar entre estilos de color.
+
+8. Animación o transición al agregar/editar
+   Más suavidad y estética.
+
+
+🧩 GESTIÓN
+9. Ordenar por nombre / veces visto / favoritas
+   Que puedas reordenar tu lista.
+
+10. Soporte para múltiples links (Pornhub + Eporner + otros)
+    Ya lo hicimos en parte, pero se puede expandir con íconos o pestañas por plataforma.
+
+11. Notas personales por actriz
+    Por ejemplo: “Esta es buena en X”, “ver video que dejé guardado”, etc.
+
+12 función rápida de guardado inmediato
+
+Podemos avanzar con alguna de estas ideas:
+
+Sección “Recientes”: guarda automáticamente las últimas actrices que viste (quizás desde el botón “sorpresa” o buscador).
+
+Botón “Guardar Rápido”: donde ingresás solo nombre + imagen + link rápido.
+
+Extensión de navegador (a futuro): para guardar una actriz directo desde cualquier sitio.
+
+Atajo de teclado o botón flotante dentro del sistema para guardar al instante.
