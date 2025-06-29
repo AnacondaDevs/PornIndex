@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-const ActressCard = ({ actress, onClick, onEdit, onToggleFavorite, viewMode }) => {
+const ActressCard = ({ actress, onClick, onEdit, onToggleFavorite, onDelete, viewMode }) => {
   const [showOptions, setShowOptions] = useState(false)
 
   const handleImageClick = () => {
@@ -12,26 +12,8 @@ const ActressCard = ({ actress, onClick, onEdit, onToggleFavorite, viewMode }) =
   }
 
   const handleOpen = (url) => {
-    if (!url) return
     window.open(url, '_blank')
     setShowOptions(false)
-  }
-
-  // Obtener lista de todos los links (url principal + urls array)
-  const allLinks = []
-
-  if (actress.url) {
-    allLinks.push({ link: actress.url, label: 'Pornhub' })
-  }
-
-  if (Array.isArray(actress.urls)) {
-    actress.urls.forEach((url) => {
-      if (url && typeof url === 'string' && url.trim() !== '') {
-        allLinks.push({ link: url })
-      } else if (url && typeof url === 'object' && url.link) {
-        allLinks.push({ link: url.link, label: url.label })
-      }
-    })
   }
 
   if (viewMode === 'grid') {
@@ -58,24 +40,32 @@ const ActressCard = ({ actress, onClick, onEdit, onToggleFavorite, viewMode }) =
 
         {showOptions && (
           <div style={optionsStyle}>
-            {allLinks.map((entry, idx) => {
-              const urlLower = entry.link.toLowerCase()
-              let icon = '🧭'
+            {actress.url && (
+              <button onClick={() => handleOpen(actress.url)}>🔗 Principal</button>
+            )}
+            {Array.isArray(actress.urls) && actress.urls.map((link, idx) => {
+              if (!link) return null
+              const url = typeof link === 'string' ? link : link.link
+              if (!url) return null
 
-              if (urlLower.includes('pornhub.com')) icon = '🔗'
-              else if (urlLower.includes('eporner.com')) icon = '🎥'
-              else if (urlLower.includes('instagram.com')) icon = '📸'
+              let icon = '🧭'
+              const urlLower = url.toLowerCase()
+
+              if (urlLower.includes('instagram.com')) icon = '📸'
               else if (urlLower.includes('twitter.com') || urlLower.includes('x.com')) icon = '🐦'
               else if (urlLower.includes('onlyfans.com')) icon = '🔒'
               else if (urlLower.includes('tiktok.com')) icon = '🎵'
               else if (urlLower.includes('reddit.com')) icon = '👽'
               else if (urlLower.includes('facebook.com')) icon = '📘'
               else if (urlLower.includes('youtube.com')) icon = '▶️'
+              else if (urlLower.includes('eporner.com')) icon = '🎥'
 
-              const label = entry.label || entry.link.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]
+              const label = typeof link === 'object' && link.label
+                ? link.label
+                : url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]
 
               return (
-                <button key={idx} onClick={() => handleOpen(entry.link)}>
+                <button key={idx} onClick={() => handleOpen(url)}>
                   {icon} {label}
                 </button>
               )
@@ -86,6 +76,10 @@ const ActressCard = ({ actress, onClick, onEdit, onToggleFavorite, viewMode }) =
 
       <h3>{actress.nombre}</h3>
       <p>{actress.descripcion}</p>
+
+      {actress.nota && (
+        <p style={noteStyle}><strong>📝 Nota:</strong> {actress.nota}</p>
+      )}
 
       {actress.tags?.length > 0 && (
         <div style={tagContainer}>
@@ -99,6 +93,7 @@ const ActressCard = ({ actress, onClick, onEdit, onToggleFavorite, viewMode }) =
       <button onClick={() => onToggleFavorite(actress.id)} style={favBtnStyle}>
         {actress.favorita ? '💔 Quitar favorita' : '❤️ Marcar favorita'}
       </button>
+      <button onClick={() => onDelete(actress.id)} style={deleteBtnStyle}>🗑 Eliminar</button>
     </div>
   )
 }
@@ -171,13 +166,37 @@ const favBtnStyle = {
   cursor: 'pointer'
 }
 
+const deleteBtnStyle = {
+  marginTop: '6px',
+  padding: '4px 10px',
+  fontSize: '12px',
+  borderRadius: '6px',
+  border: 'none',
+  backgroundColor: '#cc0000',
+  color: 'white',
+  cursor: 'pointer'
+}
+
+const noteStyle = {
+  fontStyle: 'italic',
+  fontSize: '13px',
+  backgroundColor: '#000',
+  color: '#fff' , // ✅ texto negro
+  borderRadius: '6px',
+  padding: '6px',
+  marginTop: '6px',
+  width: '100%',
+  textAlign: 'left'
+}
+
+
 const gridCardStyle = {
   width: '180px',
   margin: '8px',
   cursor: 'pointer',
   borderRadius: '8px',
   overflow: 'hidden',
-  boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
 }
 
 export default ActressCard
