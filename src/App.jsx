@@ -33,25 +33,26 @@ const App = () => {
   })
   const [selected, setSelected] = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
-  const [pendingOpen, setPendingOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark')
-  const [orderBy, setOrderBy] = useState(() => localStorage.getItem('orderBy') || 'default')
-  const [viewMode, setViewMode] = useState('list')
+  const [order, setOrder] = useState('nombre')
+  const [collapsed, setCollapsed] = useState({
+    destacada: false,
+    favoritas: false,
+    todas: false
+  })
 
-  const [showFeatured, setShowFeatured] = useState(true)
-  const [showFavoritas, setShowFavoritas] = useState(true)
-  const [showTodas, setShowTodas] = useState(true)
+  const [pendings, setPendings] = useState(() => {
+    const stored = localStorage.getItem('pendientes')
+    return stored ? JSON.parse(stored) : []
+  })
+  const [showPendingModal, setShowPendingModal] = useState(false)
+
+  const currentTheme = themes[theme]
 
   useEffect(() => {
     localStorage.setItem('theme', theme)
   }, [theme])
-
-  useEffect(() => {
-    localStorage.setItem('orderBy', orderBy)
-  }, [orderBy])
-
-  const currentTheme = themes[theme]
 
   const updateLocalStorage = (list) => {
     localStorage.setItem('actrices', JSON.stringify(list))
@@ -79,7 +80,7 @@ const App = () => {
   }
 
   const handleDelete = (id) => {
-    const updated = actresses.filter((a) => a.id !== id)
+    const updated = actresses.filter(a => a.id !== id)
     setActresses(updated)
     updateLocalStorage(updated)
   }
@@ -139,17 +140,17 @@ const App = () => {
   const handleSurprise = () => {
     if (actresses.length === 0) return
     const random = actresses[Math.floor(Math.random() * actresses.length)]
-    window.open(random.url, '_blank')
+    if (random.url) {
+      window.open(random.url, '_blank')
+    }
   }
 
   const featured = actresses.reduce((prev, curr) =>
     curr.vecesVisto > prev.vecesVisto ? curr : prev
-  )
+  , actresses[0] || {})
 
-  const favoritas = actresses.filter(a => a.favorita)
-  const todas = actresses.filter(a => a.id !== featured.id)
-
-  const filteredActresses = todas
+  const filteredActresses = actresses
+    .filter((a) => a.id !== featured?.id)
     .filter((a) => {
       const term = searchTerm.toLowerCase()
       return (
@@ -160,128 +161,162 @@ const App = () => {
     })
 
   const sortedActresses = [...filteredActresses].sort((a, b) => {
-    switch (orderBy) {
-      case 'nombre':
-        return a.nombre.localeCompare(b.nombre)
-      case 'veces':
-        return b.vecesVisto - a.vecesVisto
-      case 'favoritas':
-        return b.favorita - a.favorita
-      default:
-        return 0
-    }
+    if (order === 'nombre') return a.nombre.localeCompare(b.nombre)
+    if (order === 'vecesVisto') return b.vecesVisto - a.vecesVisto
+    if (order === 'favorita') return (b.favorita ? 1 : 0) - (a.favorita ? 1 : 0)
+    return 0
   })
 
+  const favoritas = actresses.filter(a => a.favorita)
+
+  const handleAddPending = (item) => {
+    const updated = [...pendings, item]
+    setPendings(updated)
+    localStorage.setItem('pendientes', JSON.stringify(updated))
+  }
+
+  const handleDeletePending = (id) => {
+    const updated = pendings.filter(p => p.id !== id)
+    setPendings(updated)
+    localStorage.setItem('pendientes', JSON.stringify(updated))
+  }
+
+  const toggleCollapse = (section) => {
+    setCollapsed(prev => ({ ...prev, [section]: !prev[section] }))
+  }
+
   return (
-    <div style={{ padding: '20px', fontFamily: 'Arial', backgroundColor: currentTheme.background, minHeight: '100vh', color: currentTheme.text }}>
+    <div style={{ padding: '20px', fontFamily: 'Arial, sans-serif', backgroundColor: currentTheme.background, minHeight: '100vh', color: currentTheme.text }}>
       <h1>PornIndex</h1>
 
       <ThemeToggle current={theme} setTheme={setTheme} />
 
-      <button
-        onClick={() => window.open('https://www.pornhub.com/video/search?search=johnny+sins', '_blank')}
-        style={{ ...johnnyBtnStyle, backgroundColor: currentTheme.button }}
-      >
+      <button onClick={() => window.open('https://www.pornhub.com/video/search?search=johnny+sins', '_blank')} style={{ ...johnnyBtnStyle, backgroundColor: currentTheme.button }}>
         🎲 Que decida Johnny Sins
       </button>
 
-      <button
-        onClick={handleSurprise}
-        style={{ ...johnnyBtnStyle, backgroundColor: '#4CAF50', top: '60px' }}
-      >
+      <button onClick={handleSurprise} style={{ ...johnnyBtnStyle, backgroundColor: '#4CAF50', top: '60px' }}>
         🎁 Sorpresa
       </button>
 
       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '20px' }}>
         <button onClick={openAddForm} style={{ ...addBtnStyle, backgroundColor: currentTheme.button }}>➕ Agregar actriz</button>
         <button onClick={handleExport} style={{ ...addBtnStyle, backgroundColor: currentTheme.button }}>📤 Exportar</button>
-        <label htmlFor="file-upload" style={{ ...addBtnStyle, backgroundColor: currentTheme.button }}>
-          📂 Importar
-        </label>
+        <label htmlFor="file-upload" style={{ ...addBtnStyle, backgroundColor: currentTheme.button }}>📂 Importar</label>
         <input id="file-upload" type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
-        <button onClick={() => setPendingOpen(true)} style={{ ...addBtnStyle, backgroundColor: currentTheme.button }}>📝 Pendientes</button>
+        <button onClick={() => setShowPendingModal(true)} style={{ ...addBtnStyle, backgroundColor: currentTheme.button }}>📌 Pendientes</button>
       </div>
+
+      <input
+        type="text"
+        placeholder="🔍 Buscar actriz..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{
+          display: 'block',
+          margin: '0 auto 20px',
+          padding: '10px 15px',
+          fontSize: '16px',
+          borderRadius: '8px',
+          border: '1px solid #555',
+          backgroundColor: '#1e1e1e',
+          color: '#eee',
+          width: '80%',
+          maxWidth: '400px'
+        }}
+      />
 
       <div style={{ textAlign: 'center', marginBottom: '10px' }}>
-        <input
-          type="text"
-          placeholder="🔍 Buscar actriz..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{
-            padding: '10px',
-            fontSize: '16px',
-            borderRadius: '8px',
-            border: '1px solid #555',
-            backgroundColor: '#1e1e1e',
-            color: '#eee',
-            width: '60%',
-            maxWidth: '400px'
-          }}
-        />
-      </div>
-
-      <div style={{ textAlign: 'center', marginBottom: '15px' }}>
-        <select value={orderBy} onChange={(e) => setOrderBy(e.target.value)} style={{ padding: '8px', fontSize: '14px', borderRadius: '6px' }}>
-          <option value="default">🔃 Orden original</option>
-          <option value="nombre">🔤 Ordenar por nombre</option>
-          <option value="veces">🔥 Ordenar por vistas</option>
-          <option value="favoritas">⭐ Favoritas primero</option>
+        <select value={order} onChange={(e) => setOrder(e.target.value)} style={{ padding: '6px 10px', borderRadius: '6px', fontSize: '14px' }}>
+          <option value="nombre">🔠 Ordenar por nombre</option>
+          <option value="vecesVisto">🔥 Más vistas</option>
+          <option value="favorita">❤️ Favoritas primero</option>
         </select>
-
-        <button onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')} style={{ marginLeft: '12px', padding: '8px' }}>
-          {viewMode === 'list' ? '🖼 Galería' : '📋 Lista'}
-        </button>
       </div>
+
+      {!collapsed.destacada && <FeaturedActress actress={featured} />}
+      <button onClick={() => toggleCollapse('destacada')}>{collapsed.destacada ? '📂 Mostrar destacada' : '📁 Ocultar destacada'}</button>
 
       <Stats actresses={actresses} />
 
-      {/* DESTACADA */}
-      <h2 onClick={() => setShowFeatured(!showFeatured)} style={{ cursor: 'pointer' }}>
-        {showFeatured ? '📌 Destacada ▾' : '📌 Destacada ▸'}
-      </h2>
-      {showFeatured && (
-        <FeaturedActress actress={featured} onEdit={openEditForm} />
+      {favoritas.length > 0 && (
+        <>
+          <h2 onClick={() => toggleCollapse('favoritas')} style={{ cursor: 'pointer', color: currentTheme.button }}>
+            {collapsed.favoritas ? '📂 Mostrar favoritas' : '📁 Ocultar favoritas'}
+          </h2>
+          {!collapsed.favoritas && (
+            <div style={cardContainerStyle}>
+              {favoritas.map((actress) => (
+                <ActressCard
+                  key={actress.id}
+                  actress={actress}
+                  onClick={handleClick}
+                  onEdit={openEditForm}
+                  onDelete={handleDelete}
+                  onToggleFavorite={toggleFavorite}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
-      {/* FAVORITAS */}
-      <h2 onClick={() => setShowFavoritas(!showFavoritas)} style={{ cursor: 'pointer', color: currentTheme.button }}>
-        {showFavoritas ? '⭐ Favoritas ▾' : '⭐ Favoritas ▸'}
+      <h2 onClick={() => toggleCollapse('todas')} style={{ textAlign: 'center', marginTop: '30px', cursor: 'pointer' }}>
+        {collapsed.todas ? '📂 Mostrar todas' : '📁 Ocultar todas'}
       </h2>
-      {showFavoritas && (
+      {!collapsed.todas && (
         <div style={cardContainerStyle}>
-          {favoritas.map((a) => (
+          {sortedActresses.map((actress) => (
             <ActressCard
-              key={a.id}
-              actress={a}
+              key={actress.id}
+              actress={actress}
               onClick={handleClick}
               onEdit={openEditForm}
               onDelete={handleDelete}
               onToggleFavorite={toggleFavorite}
-              viewMode={viewMode}
             />
           ))}
         </div>
       )}
 
-      {/* TODAS */}
-      <h2 onClick={() => setShowTodas(!showTodas)} style={{ cursor: 'pointer' }}>
-        {showTodas ? '📂 Todas ▾' : '📂 Todas ▸'}
-      </h2>
-      {showTodas && (
-        <div style={cardContainerStyle}>
-          {sortedActresses.map((a) => (
-            <ActressCard
-              key={a.id}
-              actress={a}
-              onClick={handleClick}
-              onEdit={openEditForm}
-              onDelete={handleDelete}
-              onToggleFavorite={toggleFavorite}
-              viewMode={viewMode}
-            />
-          ))}
-        </div>
+      {pendings.length > 0 && (
+        <>
+          <h2 style={{ textAlign: 'center', marginTop: '30px', color: currentTheme.button }}>
+            📌 Pendientes por explorar
+          </h2>
+          <ul style={{ listStyle: 'none', padding: 0 }}>
+            {pendings.map(p => (
+              <li key={p.id} style={{
+                backgroundColor: '#2c2c2c',
+                color: '#eee',
+                borderRadius: '8px',
+                padding: '10px',
+                marginBottom: '10px'
+              }}>
+                <strong>{p.titulo}</strong>
+                {p.descripcion && <p>{p.descripcion}</p>}
+                {p.link && (
+                  <a href={p.link} target="_blank" rel="noopener noreferrer" style={{ color: '#4ecdc4' }}>
+                    Ver enlace 🔗
+                  </a>
+                )}
+                <div>
+                  <button onClick={() => handleDeletePending(p.id)} style={{
+                    marginTop: '6px',
+                    backgroundColor: '#ff5555',
+                    color: 'white',
+                    border: 'none',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}>
+                    Eliminar
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
 
       <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
@@ -298,7 +333,11 @@ const App = () => {
         />
       </Modal>
 
-      <PendingModal isOpen={pendingOpen} onClose={() => setPendingOpen(false)} />
+      {showPendingModal && (
+        <Modal isOpen={showPendingModal} onClose={() => setShowPendingModal(false)}>
+          <PendingModal onAdd={handleAddPending} onClose={() => setShowPendingModal(false)} />
+        </Modal>
+      )}
     </div>
   )
 }
@@ -331,7 +370,7 @@ const johnnyBtnStyle = {
   fontSize: '14px',
   display: 'flex',
   alignItems: 'center',
-  boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
+  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
   cursor: 'pointer',
   zIndex: 999
 }

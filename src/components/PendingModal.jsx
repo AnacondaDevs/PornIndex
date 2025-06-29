@@ -1,84 +1,92 @@
-import React from 'react'
+import React, { useState } from 'react'
 
-const PendingModal = ({ isOpen, onClose }) => {
-  if (!isOpen) return null
+const PendingModal = ({ onAdd, onClose }) => {
+  const [form, setForm] = useState({
+    titulo: '',
+    descripcion: '',
+    link: ''
+  })
 
-  const pendientes = JSON.parse(localStorage.getItem('pendientes')) || []
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value
+    })
+  }
 
-  const handleDelete = (index) => {
-    const actualizados = pendientes.filter((_, i) => i !== index)
-    localStorage.setItem('pendientes', JSON.stringify(actualizados))
-    window.location.reload()
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const nuevoPendiente = {
+      id: Date.now(),
+      ...form
+    }
+    onAdd(nuevoPendiente)
+    onClose()
   }
 
   return (
-    <div style={modalOverlay}>
-      <div style={modalContent}>
-        <h2>📝 Pendientes</h2>
-        {pendientes.length === 0 ? (
-          <p>No hay notas pendientes.</p>
-        ) : (
-          <ul>
-            {pendientes.map((item, index) => (
-              <li key={index} style={{ marginBottom: '10px' }}>
-                <strong>{item.titulo}</strong><br />
-                {item.descripcion}<br />
-                {item.link && (
-                  <a href={item.link} target="_blank" rel="noopener noreferrer">🔗 Ver enlace</a>
-                )}
-                <br />
-                <button onClick={() => handleDelete(index)} style={deleteBtn}>❌ Eliminar</button>
-              </li>
-            ))}
-          </ul>
-        )}
-        <button onClick={onClose} style={closeBtn}>Cerrar</button>
-      </div>
+    <div style={{ padding: '20px', maxWidth: '400px' }}>
+      <h2>Nuevo pendiente</h2>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <input
+          type="text"
+          name="titulo"
+          placeholder="Título o referencia"
+          value={form.titulo}
+          onChange={handleChange}
+          required
+          style={inputStyle}
+        />
+        <input
+          type="text"
+          name="link"
+          placeholder="Link del video"
+          value={form.link}
+          onChange={handleChange}
+          style={inputStyle}
+        />
+        <textarea
+          name="descripcion"
+          placeholder="Descripción o idea"
+          value={form.descripcion}
+          onChange={handleChange}
+          rows={3}
+          style={inputStyle}
+        ></textarea>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+          <button type="button" onClick={onClose} style={buttonStyleCancel}>Cancelar</button>
+          <button type="submit" style={buttonStyleConfirm}>Guardar</button>
+        </div>
+      </form>
     </div>
   )
 }
 
-const modalOverlay = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(0, 0, 0, 0.6)',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  zIndex: 1000
+const inputStyle = {
+  padding: '8px',
+  borderRadius: '6px',
+  border: '1px solid #999',
+  fontSize: '14px',
+  backgroundColor: '#1e1e1e',
+  color: '#eee'
 }
 
-const modalContent = {
-  backgroundColor: '#fff',
-  borderRadius: '8px',
-  padding: '20px',
-  width: '90%',
-  maxWidth: '500px',
-  maxHeight: '80vh',
-  overflowY: 'auto'
+const buttonStyleCancel = {
+  padding: '6px 12px',
+  backgroundColor: '#999',
+  color: '#fff',
+  border: 'none',
+  borderRadius: '6px',
+  cursor: 'pointer'
 }
 
-const deleteBtn = {
-  marginTop: '5px',
-  padding: '5px 10px',
-  backgroundColor: '#ff4d4d',
+const buttonStyleConfirm = {
+  padding: '6px 12px',
+  backgroundColor: '#4CAF50',
   color: 'white',
   border: 'none',
   borderRadius: '6px',
-  cursor: 'pointer',
-  fontSize: '12px'
-}
-
-const closeBtn = {
-  marginTop: '20px',
-  padding: '8px 15px',
-  backgroundColor: '#333',
-  color: 'white',
-  border: 'none',
-  borderRadius: '8px',
   cursor: 'pointer'
 }
 
