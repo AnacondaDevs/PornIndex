@@ -39,7 +39,8 @@ const App = () => {
   const [collapsed, setCollapsed] = useState({
     destacada: false,
     favoritas: false,
-    todas: false
+    todas: false,
+    pendientes: false
   })
 
   const [pendings, setPendings] = useState(() => {
@@ -281,41 +282,43 @@ const App = () => {
 
       {pendings.length > 0 && (
         <>
-          <h2 style={{ textAlign: 'center', marginTop: '30px', color: currentTheme.button }}>
-            📌 Pendientes por explorar
+          <h2 onClick={() => toggleCollapse('pendientes')} style={{ textAlign: 'center', marginTop: '30px', color: currentTheme.button, cursor: 'pointer' }}>
+            {collapsed.pendientes ? '📂 Mostrar pendientes por explorar' : '📁 Ocultar pendientes por explorar'}
           </h2>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            {pendings.map(p => (
-              <li key={p.id} style={{
-                backgroundColor: '#2c2c2c',
-                color: '#eee',
-                borderRadius: '8px',
-                padding: '10px',
-                marginBottom: '10px'
-              }}>
-                <strong>{p.titulo}</strong>
-                {p.descripcion && <p>{p.descripcion}</p>}
-                {p.link && (
-                  <a href={p.link} target="_blank" rel="noopener noreferrer" style={{ color: '#4ecdc4' }}>
-                    Ver enlace 🔗
-                  </a>
-                )}
-                <div>
-                  <button onClick={() => handleDeletePending(p.id)} style={{
-                    marginTop: '6px',
-                    backgroundColor: '#ff5555',
-                    color: 'white',
-                    border: 'none',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                  }}>
-                    Eliminar
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {!collapsed.pendientes && (
+            <ul style={{ listStyle: 'none', padding: 0 }}>
+              {pendings.map(p => (
+                <li key={p.id} style={{
+                  backgroundColor: '#2c2c2c',
+                  color: '#eee',
+                  borderRadius: '8px',
+                  padding: '10px',
+                  marginBottom: '10px'
+                }}>
+                  <strong>{p.titulo}</strong>
+                  {p.descripcion && <p>{p.descripcion}</p>}
+                  {p.link && (
+                    <a href={p.link} target="_blank" rel="noopener noreferrer" style={{ color: '#4ecdc4' }}>
+                      Ver enlace 🔗
+                    </a>
+                  )}
+                  <div>
+                    <button onClick={() => handleDeletePending(p.id)} style={{
+                      marginTop: '6px',
+                      backgroundColor: '#ff5555',
+                      color: 'white',
+                      border: 'none',
+                      padding: '4px 8px',
+                      borderRadius: '4px',
+                      cursor: 'pointer'
+                    }}>
+                      Eliminar
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </>
       )}
 

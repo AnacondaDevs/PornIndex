@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PornIndex - Proyecto y Documentación</title>
+  <style>
+    /* Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f9f9f9;
+      color: #222;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    header {
+      max-width: 900px;
+      width: 100%;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    header h1 {
+      font-weight: 700;
+      font-size: 2.8rem;
+      color: #2c3e50;
+      margin-bottom: 0.2em;
+    }
+    header p {
+      font-size: 1.15rem;
+      color: #555;
+      margin-top: 0;
+    }
+    main {
+      max-width: 900px;
+      width: 100%;
+      background: white;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    section + section {
+      margin-top: 40px;
+    }
+    h2 {
+      border-bottom: 2px solid #2980b9;
+      padding-bottom: 6px;
+      color: #2980b9;
+      margin-bottom: 15px;
+      font-weight: 600;
+      font-size: 1.8rem;
+    }
+    ul {
+      padding-left: 1.2rem;
+      margin: 0 0 15px 0;
+    }
+    li {
+      margin-bottom: 10px;
+    }
+    code, pre {
+      background-color: #ecf0f1;
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-family: Consolas, Monaco, 'Courier New', monospace;
+      font-size: 0.95rem;
+      color: #34495e;
+    }
+    pre {
+      overflow-x: auto;
+      padding: 15px;
+      margin: 10px 0 20px 0;
+      font-size: 0.9rem;
+    }
+    a {
+      color: #2980b9;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    footer {
+      margin-top: 50px;
+      font-size: 0.9rem;
+      color: #888;
+      text-align: center;
+      width: 100%;
+      max-width: 900px;
+    }
+    /* Buttons style for link clones */
+    .btn-link {
+      display: inline-block;
+      background-color: #2980b9;
+      color: white;
+      padding: 10px 18px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 10px;
+      transition: background-color 0.3s ease;
+    }
+    .btn-link:hover {
+      background-color: #1c5980;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PornIndex</h1>
+    <p>Proyecto de catálogo y gestión de actrices con múltiples enlaces y filtros personalizados.</p>
+    <a href="https://github.com/AnacondaDevs/PornIndex" target="_blank" class="btn-link">Ver repositorio en GitHub</a>
+  </header>
+
+  <main>
+    <section id="funcionalidades">
+      <h2>Funcionalidades principales</h2>
+      <ul>
+        <li>Listado y búsqueda de actrices con filtros por nombre, vistas y favoritas.</li>
+        <li>Soporte para múltiples enlaces (Pornhub, Eporner, Instagram, OnlyFans, etc.) por actriz.</li>
+        <li>Modo de visualización en lista o galería.</li>
+        <li>Agregar, editar y eliminar actrices con formulario dinámico.</li>
+        <li>Marcado de actrices favoritas y estadísticas de vistas.</li>
+        <li>Exportar e importar la base de datos en formato JSON.</li>
+        <li>Modo oscuro, claro y personalizado para la interfaz.</li>
+      </ul>
+    </section>
+
+    <section id="como-usar">
+      <h2>Cómo usar</h2>
+      <p>Para ejecutar PornIndex en tu máquina local, sigue estos pasos:</p>
+      <ol>
+        <li>Clona el repositorio: <code>git clone https://github.com/AnacondaDevs/PornIndex.git</code></li>
+        <li>Entra en la carpeta del proyecto: <code>cd PornIndex</code></li>
+        <li>Instala las dependencias: <code>npm install</code></li>
+        <li>Ejecuta la aplicación: <code>npm start</code></li>
+        <li>Abre tu navegador en <code>http://localhost:3000</code></li>
+      </ol>
+      <p>¡Listo! Ya puedes comenzar a explorar, agregar y administrar actrices.</p>
+    </section>
+
+    <section id="estructura-datos">
+      <h2>Estructura de datos de una actriz</h2>
+      <p>Ejemplo del objeto JSON para una actriz con múltiples enlaces:</p>
+      <pre><code>{
+  "id": "actress123",
+  "nombre": "Ejemplo Nombre",
+  "descripcion": "Descripción breve de la actriz",
+  "imagen": "https://url-a-imagen.jpg",
+  "tags": ["tag1", "tag2", "tag3"],
+  "nota": "Notas o comentarios adicionales",
+  "favorita": true,
+  "vecesVisto": 42,
+  "url": "https://pornhub.com/ejemplo",
+  "urlSecundaria": "https://eporner.com/ejemplo",
+  "urls": [
+    {
+      "label": "Instagram",
+      "link": "https://instagram.com/ejemplo"
+    },
+    {
+      "label": "OnlyFans",
+      "link": "https://onlyfans.com/ejemplo"
+    }
+  ]
+}</code></pre>
+    </section>
+
+    <section id="componentes">
+      <h2>Componentes principales</h2>
+      <p>A continuación un resumen de los componentes clave en el proyecto:</p>
+      <ul>
+        <li><strong>App.jsx:</strong> Componente principal que administra el estado global, filtros, y controla la visualización.</li>
+        <li><strong>ActressCard.jsx:</strong> Tarjeta para mostrar la información resumida de cada actriz y los múltiples enlaces.</li>
+        <li><strong>Modal.jsx:</strong> Componente reutilizable para mostrar formularios y detalles en ventanas modales.</li>
+        <li><strong>AddActressForm.jsx:</strong> Formulario para agregar o editar actrices.</li>
+        <li><strong>FeaturedActress.jsx:</strong> Destaca la actriz más vista.</li>
+        <li><strong>Stats.jsx:</strong> Estadísticas generales del catálogo.</li>
+        <li><strong>PendingModal.jsx:</strong> Modal para mostrar tareas pendientes o notas.</li>
+      </ul>
+    </section>
+
+    <section id="extensiones">
+      <h2>Extensiones y tips</h2>
+      <ul>
+        <li>Incorporar <code>react-router</code> para navegación a páginas de detalle dedicadas.</li>
+        <li>Agregar paginación para listas largas de actrices.</li>
+        <li>Implementar autenticación para usuarios y manejo de perfiles.</li>
+        <li>Mejorar diseño visual con frameworks CSS (Tailwind, Chakra UI, etc.) o Styled Components.</li>
+        <li>Soporte para imágenes locales o subida de imágenes desde el usuario.</li>
+      </ul>
+    </section>
+
+    <section id="licencia">
+      <h2>Licencia y créditos</h2>
+      <p>Este proyecto es open source y está bajo licencia MIT.</p>
+      <p>Desarrollado por <strong>AnacondaDevs</strong>.</p>
+      <p>Repositorio: <a href="https://github.com/AnacondaDevs/PornIndex" target="_blank">https://github.com/AnacondaDevs/PornIndex</a></p>
+    </section>
+  </main>
+
+  <footer>
+    &copy; 2025 PornIndex. Todos los derechos reservados.
+  </footer>
+</body>
+</html>
