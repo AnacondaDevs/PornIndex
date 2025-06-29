@@ -4,8 +4,9 @@ import FeaturedActress from './components/FeaturedActress'
 import Stats from './components/Stats'
 import AddActressForm from './components/AddActressForm'
 import Modal from './components/Modal'
-import initialActresses from './data/initialActresses'
 import ThemeToggle from './components/ThemeToggle'
+import PendingModal from './components/PendingModal'
+import initialActresses from './data/initialActresses'
 
 const themes = {
   dark: {
@@ -30,24 +31,25 @@ const App = () => {
     const stored = localStorage.getItem('actrices')
     return stored ? JSON.parse(stored) : initialActresses
   })
-
   const [selected, setSelected] = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const [pendingOpen, setPendingOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark')
-  const [sortBy, setSortBy] = useState(() => localStorage.getItem('sortBy') || 'nombre')
+  const [orderBy, setOrderBy] = useState(() => localStorage.getItem('orderBy') || 'default')
+  const [viewMode, setViewMode] = useState('list')
 
   const [showFeatured, setShowFeatured] = useState(true)
-  const [showFavorites, setShowFavorites] = useState(true)
-  const [showAll, setShowAll] = useState(true)
+  const [showFavoritas, setShowFavoritas] = useState(true)
+  const [showTodas, setShowTodas] = useState(true)
 
   useEffect(() => {
     localStorage.setItem('theme', theme)
   }, [theme])
 
   useEffect(() => {
-    localStorage.setItem('sortBy', sortBy)
-  }, [sortBy])
+    localStorage.setItem('orderBy', orderBy)
+  }, [orderBy])
 
   const currentTheme = themes[theme]
 
@@ -76,8 +78,14 @@ const App = () => {
     setSelected(null)
   }
 
+  const handleDelete = (id) => {
+    const updated = actresses.filter((a) => a.id !== id)
+    setActresses(updated)
+    updateLocalStorage(updated)
+  }
+
   const toggleFavorite = (id) => {
-    const updated = actresses.map((a) =>
+    const updated = actresses.map(a =>
       a.id === id ? { ...a, favorita: !a.favorita } : a
     )
     setActresses(updated)
@@ -138,39 +146,36 @@ const App = () => {
     curr.vecesVisto > prev.vecesVisto ? curr : prev
   )
 
-  const favoritas = actresses.filter((a) => a.favorita)
+  const favoritas = actresses.filter(a => a.favorita)
+  const todas = actresses.filter(a => a.id !== featured.id)
 
-  const sortedActresses = [...actresses].sort((a, b) => {
-    if (sortBy === 'nombre') {
-      return a.nombre.localeCompare(b.nombre)
-    } else if (sortBy === 'vecesVisto') {
-      return b.vecesVisto - a.vecesVisto
-    } else if (sortBy === 'favoritas') {
-      return (b.favorita ? 1 : 0) - (a.favorita ? 1 : 0)
-    }
-    return 0
-  })
-
-  const filteredActresses = sortedActresses
-    .filter((a) => a.id !== featured.id)
+  const filteredActresses = todas
     .filter((a) => {
       const term = searchTerm.toLowerCase()
       return (
         a.nombre.toLowerCase().includes(term) ||
         a.descripcion?.toLowerCase().includes(term) ||
-        a.tags?.some((tag) => tag.toLowerCase().includes(term))
+        a.tags?.some(tag => tag.toLowerCase().includes(term))
       )
     })
 
+  const sortedActresses = [...filteredActresses].sort((a, b) => {
+    switch (orderBy) {
+      case 'nombre':
+        return a.nombre.localeCompare(b.nombre)
+      case 'veces':
+        return b.vecesVisto - a.vecesVisto
+      case 'favoritas':
+        return b.favorita - a.favorita
+      default:
+        return 0
+    }
+  })
+
   return (
-    <div style={{
-      padding: '20px',
-      fontFamily: 'Arial, sans-serif',
-      backgroundColor: currentTheme.background,
-      minHeight: '100vh',
-      color: currentTheme.text
-    }}>
+    <div style={{ padding: '20px', fontFamily: 'Arial', backgroundColor: currentTheme.background, minHeight: '100vh', color: currentTheme.text }}>
       <h1>PornIndex</h1>
+
       <ThemeToggle current={theme} setTheme={setTheme} />
 
       <button
@@ -179,6 +184,7 @@ const App = () => {
       >
         🎲 Que decida Johnny Sins
       </button>
+
       <button
         onClick={handleSurprise}
         style={{ ...johnnyBtnStyle, backgroundColor: '#4CAF50', top: '60px' }}
@@ -192,66 +198,87 @@ const App = () => {
         <label htmlFor="file-upload" style={{ ...addBtnStyle, backgroundColor: currentTheme.button }}>
           📂 Importar
         </label>
-        <input
-          id="file-upload"
-          type="file"
-          accept=".json"
-          onChange={handleImport}
-          style={{ display: 'none' }}
-        />
-        <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={sortSelectStyle}>
-          <option value="nombre">Ordenar por Nombre</option>
-          <option value="vecesVisto">Ordenar por Visitas</option>
-          <option value="favoritas">Ordenar por Favoritas</option>
-        </select>
+        <input id="file-upload" type="file" accept=".json" onChange={handleImport} style={{ display: 'none' }} />
+        <button onClick={() => setPendingOpen(true)} style={{ ...addBtnStyle, backgroundColor: currentTheme.button }}>📝 Pendientes</button>
       </div>
 
-      <input
-        type="text"
-        placeholder="🔍 Buscar actriz..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={searchInputStyle}
-      />
+      <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+        <input
+          type="text"
+          placeholder="🔍 Buscar actriz..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{
+            padding: '10px',
+            fontSize: '16px',
+            borderRadius: '8px',
+            border: '1px solid #555',
+            backgroundColor: '#1e1e1e',
+            color: '#eee',
+            width: '60%',
+            maxWidth: '400px'
+          }}
+        />
+      </div>
+
+      <div style={{ textAlign: 'center', marginBottom: '15px' }}>
+        <select value={orderBy} onChange={(e) => setOrderBy(e.target.value)} style={{ padding: '8px', fontSize: '14px', borderRadius: '6px' }}>
+          <option value="default">🔃 Orden original</option>
+          <option value="nombre">🔤 Ordenar por nombre</option>
+          <option value="veces">🔥 Ordenar por vistas</option>
+          <option value="favoritas">⭐ Favoritas primero</option>
+        </select>
+
+        <button onClick={() => setViewMode(viewMode === 'list' ? 'grid' : 'list')} style={{ marginLeft: '12px', padding: '8px' }}>
+          {viewMode === 'list' ? '🖼 Galería' : '📋 Lista'}
+        </button>
+      </div>
 
       <Stats actresses={actresses} />
 
-      {/* Destacada */}
-      <h2 onClick={() => setShowFeatured(!showFeatured)} style={sectionHeader(currentTheme.button)}>⭐ Destacada</h2>
+      {/* DESTACADA */}
+      <h2 onClick={() => setShowFeatured(!showFeatured)} style={{ cursor: 'pointer' }}>
+        {showFeatured ? '📌 Destacada ▾' : '📌 Destacada ▸'}
+      </h2>
       {showFeatured && (
-        <>
-          <FeaturedActress actress={featured} />
-          <button onClick={() => openEditForm(featured)} style={editBtnStyle}>✏️ Editar destacada</button>
-        </>
+        <FeaturedActress actress={featured} onEdit={openEditForm} />
       )}
 
-      {/* Favoritas */}
-      <h2 onClick={() => setShowFavorites(!showFavorites)} style={sectionHeader(currentTheme.button)}>💖 Favoritas</h2>
-      {showFavorites && favoritas.length > 0 && (
+      {/* FAVORITAS */}
+      <h2 onClick={() => setShowFavoritas(!showFavoritas)} style={{ cursor: 'pointer', color: currentTheme.button }}>
+        {showFavoritas ? '⭐ Favoritas ▾' : '⭐ Favoritas ▸'}
+      </h2>
+      {showFavoritas && (
         <div style={cardContainerStyle}>
-          {favoritas.map((actress) => (
+          {favoritas.map((a) => (
             <ActressCard
-              key={actress.id}
-              actress={actress}
+              key={a.id}
+              actress={a}
               onClick={handleClick}
               onEdit={openEditForm}
+              onDelete={handleDelete}
               onToggleFavorite={toggleFavorite}
+              viewMode={viewMode}
             />
           ))}
         </div>
       )}
 
-      {/* Todas */}
-      <h2 onClick={() => setShowAll(!showAll)} style={sectionHeader(currentTheme.button)}>📂 Todas</h2>
-      {showAll && (
+      {/* TODAS */}
+      <h2 onClick={() => setShowTodas(!showTodas)} style={{ cursor: 'pointer' }}>
+        {showTodas ? '📂 Todas ▾' : '📂 Todas ▸'}
+      </h2>
+      {showTodas && (
         <div style={cardContainerStyle}>
-          {filteredActresses.map((actress) => (
+          {sortedActresses.map((a) => (
             <ActressCard
-              key={actress.id}
-              actress={actress}
+              key={a.id}
+              actress={a}
               onClick={handleClick}
               onEdit={openEditForm}
+              onDelete={handleDelete}
               onToggleFavorite={toggleFavorite}
+              viewMode={viewMode}
             />
           ))}
         </div>
@@ -270,6 +297,8 @@ const App = () => {
           selected={selected}
         />
       </Modal>
+
+      <PendingModal isOpen={pendingOpen} onClose={() => setPendingOpen(false)} />
     </div>
   )
 }
@@ -290,19 +319,6 @@ const addBtnStyle = {
   cursor: 'pointer'
 }
 
-const editBtnStyle = {
-  display: 'block',
-  margin: '10px auto 30px',
-  backgroundColor: '#ff4081',
-  color: 'white',
-  border: 'none',
-  borderRadius: '8px',
-  padding: '8px 15px',
-  cursor: 'pointer',
-  fontWeight: 'bold',
-  fontSize: '14px'
-}
-
 const johnnyBtnStyle = {
   position: 'fixed',
   top: '10px',
@@ -315,38 +331,9 @@ const johnnyBtnStyle = {
   fontSize: '14px',
   display: 'flex',
   alignItems: 'center',
-  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
+  boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
   cursor: 'pointer',
   zIndex: 999
 }
-
-const searchInputStyle = {
-  display: 'block',
-  margin: '0 auto 20px',
-  padding: '10px 15px',
-  fontSize: '16px',
-  borderRadius: '8px',
-  border: '1px solid #555',
-  backgroundColor: '#1e1e1e',
-  color: '#eee',
-  width: '80%',
-  maxWidth: '400px'
-}
-
-const sortSelectStyle = {
-  padding: '10px',
-  fontSize: '14px',
-  borderRadius: '6px',
-  border: '1px solid #ccc',
-  cursor: 'pointer'
-}
-
-const sectionHeader = (color) => ({
-  textAlign: 'center',
-  color,
-  cursor: 'pointer',
-  userSelect: 'none',
-  marginTop: '30px'
-})
 
 export default App

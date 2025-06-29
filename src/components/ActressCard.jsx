@@ -93,6 +93,37 @@ const ActressCard = ({ actress, onClick, onEdit, onToggleFavorite, viewMode }) =
       <button onClick={() => onToggleFavorite(actress.id)} style={favBtnStyle}>
         {actress.favorita ? '💔 Quitar favorita' : '❤️ Marcar favorita'}
       </button>
+      <button
+  onClick={() => {
+    const descripcion = prompt('¿Qué práctica o idea querés guardar?')
+    if (!descripcion) return
+
+    const link = prompt('Link del video o referencia (opcional)')
+    const nueva = {
+      descripcion,
+      link,
+      fecha: new Date().toLocaleDateString()
+    }
+
+    const actuales = JSON.parse(localStorage.getItem('exploracion')) || []
+    const nuevas = [...actuales, nueva]
+    localStorage.setItem('exploracion', JSON.stringify(nuevas))
+    alert('Agregado a exploración ✔')
+  }}
+  style={{
+    marginTop: '6px',
+    padding: '4px 10px',
+    fontSize: '12px',
+    borderRadius: '6px',
+    border: 'none',
+    backgroundColor: '#4caf50',
+    color: 'white',
+    cursor: 'pointer'
+  }}
+>
+  📌 Agregar a exploración
+</button>
+
     </div>
   )
 }
