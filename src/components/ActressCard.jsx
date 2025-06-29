@@ -12,8 +12,26 @@ const ActressCard = ({ actress, onClick, onEdit, onToggleFavorite, viewMode }) =
   }
 
   const handleOpen = (url) => {
+    if (!url) return
     window.open(url, '_blank')
     setShowOptions(false)
+  }
+
+  // Obtener lista de todos los links (url principal + urls array)
+  const allLinks = []
+
+  if (actress.url) {
+    allLinks.push({ link: actress.url, label: 'Pornhub' })
+  }
+
+  if (Array.isArray(actress.urls)) {
+    actress.urls.forEach((url) => {
+      if (url && typeof url === 'string' && url.trim() !== '') {
+        allLinks.push({ link: url })
+      } else if (url && typeof url === 'object' && url.link) {
+        allLinks.push({ link: url.link, label: url.label })
+      }
+    })
   }
 
   if (viewMode === 'grid') {
@@ -40,19 +58,13 @@ const ActressCard = ({ actress, onClick, onEdit, onToggleFavorite, viewMode }) =
 
         {showOptions && (
           <div style={optionsStyle}>
-            {actress.url && (
-              <button onClick={() => handleOpen(actress.url)}>🔗 Pornhub</button>
-            )}
-            {actress.urlSecundaria && (
-              <button onClick={() => handleOpen(actress.urlSecundaria)}>🎥 Eporner</button>
-            )}
-            {actress.urls && actress.urls.length > 0 && actress.urls.map((entry, idx) => {
-              if (!entry.link) return null
-
-              let icon = '🧭'
+            {allLinks.map((entry, idx) => {
               const urlLower = entry.link.toLowerCase()
+              let icon = '🧭'
 
-              if (urlLower.includes('instagram.com')) icon = '📸'
+              if (urlLower.includes('pornhub.com')) icon = '🔗'
+              else if (urlLower.includes('eporner.com')) icon = '🎥'
+              else if (urlLower.includes('instagram.com')) icon = '📸'
               else if (urlLower.includes('twitter.com') || urlLower.includes('x.com')) icon = '🐦'
               else if (urlLower.includes('onlyfans.com')) icon = '🔒'
               else if (urlLower.includes('tiktok.com')) icon = '🎵'
@@ -83,47 +95,10 @@ const ActressCard = ({ actress, onClick, onEdit, onToggleFavorite, viewMode }) =
         </div>
       )}
 
-      {actress.nota && (
-        <div style={notaStyle}>
-          📝 {actress.nota}
-        </div>
-      )}
-
       <button onClick={() => onEdit(actress)} style={editBtnStyle}>✏️ Editar</button>
       <button onClick={() => onToggleFavorite(actress.id)} style={favBtnStyle}>
         {actress.favorita ? '💔 Quitar favorita' : '❤️ Marcar favorita'}
       </button>
-      <button
-  onClick={() => {
-    const descripcion = prompt('¿Qué práctica o idea querés guardar?')
-    if (!descripcion) return
-
-    const link = prompt('Link del video o referencia (opcional)')
-    const nueva = {
-      descripcion,
-      link,
-      fecha: new Date().toLocaleDateString()
-    }
-
-    const actuales = JSON.parse(localStorage.getItem('exploracion')) || []
-    const nuevas = [...actuales, nueva]
-    localStorage.setItem('exploracion', JSON.stringify(nuevas))
-    alert('Agregado a exploración ✔')
-  }}
-  style={{
-    marginTop: '6px',
-    padding: '4px 10px',
-    fontSize: '12px',
-    borderRadius: '6px',
-    border: 'none',
-    backgroundColor: '#4caf50',
-    color: 'white',
-    cursor: 'pointer'
-  }}
->
-  📌 Agregar a exploración
-</button>
-
     </div>
   )
 }
@@ -171,15 +146,6 @@ const tagStyle = {
   fontSize: '12px',
   fontWeight: 'bold',
   userSelect: 'none'
-}
-
-const notaStyle = {
-  marginTop: '10px',
-  fontStyle: 'italic',
-  fontSize: '13px',
-  color: '#444',
-  textAlign: 'center',
-  whiteSpace: 'pre-line'
 }
 
 const editBtnStyle = {
